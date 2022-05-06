@@ -1,0 +1,43 @@
+function preload() {
+
+}
+previous_result = "";
+
+function setup() {
+  canvas = createCanvas(300, 300);
+  canvas.center();
+  video = createCapture(VIDEO);
+  video.hide();
+  
+  classifier = ml5.imageClassifier('MobileNet', modelLoaded)
+}
+
+function modelLoaded() {
+  console.log("Model has been loaded!");
+}
+
+function draw() {
+  image(video, 0, 0, 300, 300);
+  classifier.classify(video, gotResults);
+}
+
+function gotResults(error, results) {
+
+  if(error) {
+
+    console.error(error);
+
+  } else if ((results[0].confidence > 0.5) && (previous_result != results[0].label)) {
+    console.log(results);
+
+    previous_result = results[0].label;
+
+    var synth = window.speechSynthesis;
+    speak_data = "Object detected is " + results[0].label;
+    utterThis = new SpeechSynthesisUtterance(speak_data);
+    synth.speak(utterThis);
+
+    document.getElementById("objectName").innerHTML = results[0].label;
+    document.getElementById("accuracyNumber").innerHTML = results[0].confidence.toFixed(2) * 100 + "%";
+  }
+}
